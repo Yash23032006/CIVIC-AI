@@ -1,0 +1,14 @@
+[project]
+name = "civicai"
+version = "0.1.0"
+description = "CivicAI - Citizen Development Intelligence"
+requires-python = ">=3.12,<3.15"
+dependencies = [
+    "Flask",
+    "Flask-Cors",
+    "Werkzeug",
+    "supabase"
+]
+
+[tool.vercel]
+entrypoint = "backend:app"

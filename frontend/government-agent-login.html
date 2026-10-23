@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicAI | Government Agent Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-modern">
+
+    <div class="auth-wrapper">
+        <div class="auth-form-section">
+            <div class="auth-form-box">
+
+                <a href="index.html">← Back to Home</a>
+
+                <h2>🏛️ Government Agent Login</h2>
+                <p>Sign in to your Government Agent account.</p>
+
+                <form id="agentLoginForm">
+                    <div class="input-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email"
+                               placeholder="Enter your email" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password"
+                               placeholder="Enter your password" required>
+                    </div>
+
+                    <button type="submit" class="modern-login-btn">
+                        Government Agent Login
+                    </button>
+
+                    <p id="message" role="status" aria-live="polite"></p>
+                </form>
+
+                <p class="account-text">
+                    New Agent?
+                    <a href="government-agent-signup.html">
+                        Create Account
+                    </a>
+                </p>
+
+                <p class="account-text">
+                    Regular User?
+                    <a href="login.html">Citizen Login</a>
+                </p>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("agentLoginForm")
+            .addEventListener("submit", async function (event) {
+                event.preventDefault();
+
+                const message = document.getElementById("message");
+                const button = this.querySelector('button[type="submit"]');
+
+                const payload = {
+                    email: document.getElementById("email").value.trim(),
+                    password: document.getElementById("password").value
+                };
+
+                message.textContent = "Checking your account...";
+                button.disabled = true;
+
+                try {
+                    const response = await fetch(
+                        "/api/government-agent/login",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(payload)
+                        }
+                    );
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        message.textContent =
+                            result.message || "Login failed. Please try again.";
+                        return;
+                    }
+
+                    // Temporary client-side data for frontend integration.
+                    // This is NOT proof of authentication or authorization.
+                    sessionStorage.setItem(
+                        "governmentAgent",
+                        JSON.stringify(result.agent)
+                    );
+
+                    message.textContent = "Login successful. Opening dashboard...";
+
+                    setTimeout(() => {
+                        window.location.href = "government-agent-dashboard.html";
+                    }, 700);
+
+                } catch (error) {
+                    console.error("Agent login error:", error);
+                    message.textContent =
+                        "Could not connect to the server. Please try again.";
+                } finally {
+                    button.disabled = false;
+                }
+            });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicAI | Government Agent Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        body {
+            background: #f3f6fb;
+            color: #1e293b;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 245px;
+            background: #102b4e;
+            color: white;
+            padding: 28px 18px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 800;
+            margin: 0 0 8px 8px;
+        }
+
+        .brand span {
+            color: #38bdf8;
+        }
+
+        .sidebar-subtitle {
+            color: #b7c8df;
+            font-size: 12px;
+            margin: 0 0 35px 8px;
+        }
+
+        .nav-item {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 14px;
+            margin-bottom: 9px;
+            border: none;
+            border-radius: 9px;
+            background: transparent;
+            color: #dce7f5;
+            font-size: 15px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .nav-item.active,
+        .nav-item:hover {
+            background: #244a76;
+            color: white;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            border-top: 1px solid #34516f;
+            padding-top: 20px;
+        }
+
+        /* Main content */
+        .main {
+            flex: 1;
+            min-width: 0;
+            padding: 30px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .topbar h1 {
+            font-size: 28px;
+            margin-bottom: 7px;
+        }
+
+        .muted {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .agent-badge {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border-radius: 30px;
+            padding: 10px 15px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .welcome {
+            padding: 25px;
+            border-radius: 16px;
+            background: linear-gradient(120deg, #163e68, #2563a6);
+            color: white;
+            margin-bottom: 25px;
+        }
+
+        .welcome h2 {
+            margin-bottom: 9px;
+            font-size: 23px;
+        }
+
+        .welcome p {
+            color: #e0efff;
+            line-height: 1.6;
+        }
+
+        .agent-details {
+            margin-top: 14px;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #dcecff;
+        }
+
+        /* Statistics */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 22px;
+            border-radius: 13px;
+            box-shadow: 0 3px 15px #0f172a0a;
+            border: 1px solid #e7edf5;
+        }
+
+        .stat-icon {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card p {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card h3 {
+            font-size: 30px;
+        }
+
+        /* Reports */
+        .reports-panel {
+            background: white;
+            padding: 24px;
+            border-radius: 15px;
+            border: 1px solid #e7edf5;
+            box-shadow: 0 3px 15px #0f172a0a;
+        }
+
+        .panel-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+
+        .panel-heading h2 {
+            font-size: 21px;
+            margin-bottom: 6px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        input, select {
+            min-width: 150px;
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #d8e0eb;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: #2563eb;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 11px 16px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-logout {
+            color: white;
+            background: #dc3545;
+            width: 100%;
+        }
+
+        .btn-logout:hover {
+            background: #b91c1c;
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 850px;
+        }
+
+        th, td {
+            padding: 15px 12px;
+            text-align: left;
+            border-bottom: 1px solid #edf1f6;
+            font-size: 13px;
+            vertical-align: top;
+        }
+
+        th {
+            color: #64748b;
+            background: #f8fafc;
+            font-weight: 700;
+        }
+
+        td {
+            line-height: 1.5;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .pending {
+            color: #92400e;
+            background: #fef3c7;
+        }
+
+        .in-progress {
+            color: #1d4ed8;
+            background: #dbeafe;
+        }
+
+        .resolved {
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        .other-status {
+            color: #475569;
+            background: #e2e8f0;
+        }
+
+        .priority {
+            font-weight: 700;
+        }
+
+        .priority-high {
+            color: #dc2626;
+        }
+
+        .priority-normal {
+            color: #475569;
+        }
+
+        .photo-link {
+            color: #2563eb;
+            text-decoration: none;
+            display: inline-block;
+            margin: 2px 5px 2px 0;
+        }
+
+        .photo-link:hover {
+            text-decoration: underline;
+        }
+
+        .message {
+            padding: 18px;
+            border-radius: 9px;
+            background: #f8fafc;
+            color: #64748b;
+            text-align: center;
+            margin: 12px 0;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 25px 0 5px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        @media (max-width: 1050px) {
+            .stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 700px) {
+            .layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 18px;
+            }
+
+            .sidebar-subtitle {
+                margin-bottom: 15px;
+            }
+
+            .sidebar-bottom {
+                margin-top: 12px;
+            }
+
+            .main {
+                padding: 18px;
+            }
+
+            .topbar h1 {
+                font-size: 23px;
+            }
+
+            .stats {
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 16px;
+            }
+
+            .stat-card h3 {
+                font-size: 25px;
+            }
+
+            .reports-panel {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">Civic<span>AI</span></div>
+        <p class="sidebar-subtitle">Government Administration Portal</p>
+
+        <a class="nav-item active" href="#overview">🏠 Dashboard Overview</a>
+        <a class="nav-item" href="#reports">📋 Citizen Complaints</a>
+
+        <div class="sidebar-bottom">
+            <button class="btn btn-logout" id="logoutBtn">
+                ↪ Logout
+            </button>
+        </div>
+    </aside>
+
+    <main class="main" id="overview">
+
+        <header class="topbar">
+            <div>
+                <h1>Government Agent Dashboard</h1>
+                <p class="muted">Monitor and review civic complaints.</p>
+            </div>
+            <span class="agent-badge">🏛️ Government Portal</span>
+        </header>
+
+        <section class="welcome">
+            <h2 id="welcomeName">Welcome, Government Agent!</h2>
+            <p>Manage citizen complaints and monitor their resolution progress from one place.</p>
+            <div class="agent-details" id="agentDetails">
+                Loading agent details...
+            </div>
+        </section>
+
+        <section class="stats">
+            <div class="stat-card">
+                <div class="stat-icon">📋</div>
+                <p>Total Complaints</p>
+                <h3 id="totalCount">—</h3>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <p>Pending</p>
+                <h3 id="pendingCount">—</h3>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🔄</div>
+                <p>In Progress</p>
+                <h3 id="progressCount">—</h3>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <p>Resolved</p>
+                <h3 id="resolvedCount">—</h3>
+            </div>
+        </section>
+
+        <section class="reports-panel" id="reports">
+            <div class="panel-heading">
+                <div>
+                    <h2>Citizen Complaints</h2>
+                    <p class="muted">Complaints retrieved from the CivicAI backend.</p>
+                </div>
+                <button class="btn btn-primary" id="refreshBtn">
+                    ↻ Refresh Reports
+                </button>
+            </div>
+
+            <div class="filters">
+                <input
+                    type="search"
+                    id="searchInput"
+                    placeholder="Search complaint, ID or location..."
+                    aria-label="Search complaints">
+
+                <select id="statusFilter" aria-label="Filter by status">
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="in progress">In Progress</option>
+                    <option value="resolved">Resolved</option>
+                </select>
+            </div>
+
+            <div id="loadMessage" class="message">
+                Loading complaints...
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Complaint ID</th>
+                            <th>Problem</th>
+                            <th>Location</th>
+                            <th>Category</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Evidence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsBody"></tbody>
+                </table>
+            </div>
+
+            <p class="muted" id="resultCount" style="margin-top:15px;"></p>
+        </section>
+
+        <div class="footer">
+            CivicAI Government Portal · Civic issue monitoring
+        </div>
+    </main>
+</div>
+
+<script>
+    const API_BASE = window.location.origin;
+
+    // The government-agent login page should save the returned agent
+    // object using sessionStorage.setItem("governmentAgent", JSON.stringify(data.agent)).
+    let agent;
+
+    try {
+        agent = JSON.parse(sessionStorage.getItem("governmentAgent") || "null");
+    } catch {
+        agent = null;
+    }
+
+    if (!agent) {
+        window.location.replace("government-agent-login.html");
+    } else {
+        document.getElementById("welcomeName").textContent =
+            "Welcome, " + (agent.full_name || "Government Agent") + "!";
+
+        document.getElementById("agentDetails").textContent =
+            "Department: " + (agent.department || "Not specified") +
+            " | Employee ID: " + (agent.employee_id || "Not specified") +
+            " | Email: " + (agent.email || "Not specified");
+    }
+
+    let allReports = [];
+
+    function safe(value) {
+        return String(value ?? "").replace(/[&<>"']/g, char => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        })[char]);
+    }
+
+    function statusClass(status) {
+        const value = String(status || "").toLowerCase();
+
+        if (value === "pending") return "pending";
+        if (value === "in progress") return "in-progress";
+        if (value === "resolved") return "resolved";
+
+        return "other-status";
+    }
+
+    function formatDate(value) {
+        if (!value) return "—";
+
+        const date = new Date(value);
+
+        if (Number.isNaN(date.getTime())) return safe(value);
+
+        return safe(date.toLocaleDateString());
+    }
+
+    function updateStatistics(reports) {
+        document.getElementById("totalCount").textContent = reports.length;
+
+        document.getElementById("pendingCount").textContent =
+            reports.filter(r =>
+                String(r.status || "").toLowerCase() === "pending"
+            ).length;
+
+        document.getElementById("progressCount").textContent =
+            reports.filter(r =>
+                String(r.status || "").toLowerCase() === "in progress"
+            ).length;
+
+        document.getElementById("resolvedCount").textContent =
+            reports.filter(r =>
+                String(r.status || "").toLowerCase() === "resolved"
+            ).length;
+    }
+
+    function renderReports() {
+        const search = document.getElementById("searchInput")
+            .value.trim().toLowerCase();
+
+        const selectedStatus = document.getElementById("statusFilter")
+            .value.toLowerCase();
+
+        const filtered = allReports.filter(report => {
+            const status = String(report.status || "").toLowerCase();
+
+            const searchableText = [
+                report.id,
+                report.problem,
+                report.location,
+                report.category,
+                report.citizen_email
+            ].join(" ").toLowerCase();
+
+            return searchableText.includes(search) &&
+                (!selectedStatus || status === selectedStatus);
+        });
+
+        const body = document.getElementById("reportsBody");
+
+        if (filtered.length === 0) {
+            body.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align:center;padding:25px;">
+                        No matching complaints found.
+                    </td>
+                </tr>`;
+        } else {
+            body.innerHTML = filtered.map(report => {
+                const priority = Number(report.priority_score || 0);
+                const photos = Array.isArray(report.evidence_photos)
+                    ? report.evidence_photos
+                    : [];
+
+                const photoLinks = photos.map((photo, index) => {
+                    const url = typeof photo === "string"
+                        ? ""
+                        : (photo.view_url || "");
+
+                    if (!url) return "";
+
+                    return `<a class="photo-link"
+                        href="${safe(url)}"
+                        target="_blank"
+                        rel="noopener noreferrer">Photo ${index + 1}</a>`;
+                }).filter(Boolean).join("");
+
+                return `
+                    <tr>
+                        <td><strong>${safe(report.id || "—")}</strong></td>
+                        <td>${safe(report.problem || "—")}</td>
+                        <td>${safe(report.location || "—")}</td>
+                        <td>${safe(report.category || "Uncategorized")}</td>
+                        <td class="priority ${priority >= 80 ? "priority-high" : "priority-normal"}">
+                            ${priority ? priority + "/100" : "—"}
+                            ${priority >= 80 ? " 🔴" : ""}
+                        </td>
+                        <td>
+                            <span class="status ${statusClass(report.status)}">
+                                ${safe(report.status || "Unknown")}
+                            </span>
+                        </td>
+                        <td>${formatDate(report.created_at)}</td>
+                        <td>${photoLinks || "—"}</td>
+                    </tr>`;
+            }).join("");
+        }
+
+        document.getElementById("resultCount").textContent =
+            `Showing ${filtered.length} of ${allReports.length} complaints.`;
+    }
+
+    async function loadReports() {
+        const message = document.getElementById("loadMessage");
+        const refreshButton = document.getElementById("refreshBtn");
+
+        message.textContent = "Loading complaints...";
+        message.className = "message";
+        message.style.display = "block";
+        refreshButton.disabled = true;
+
+        try {
+            const response = await fetch(
+                `${API_BASE}/api/government-agent/reports`
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || data.status !== "success") {
+                throw new Error(data.message || "Unable to load complaints.");
+            }
+
+            allReports = Array.isArray(data.reports) ? data.reports : [];
+
+            updateStatistics(allReports);
+            renderReports();
+
+            message.style.display = "none";
+        } catch (error) {
+            message.textContent =
+                error.message +
+                " Check that the Flask backend and Supabase are running.";
+            message.className = "message error";
+        } finally {
+            refreshButton.disabled = false;
+        }
+    }
+
+    document.getElementById("searchInput")
+        .addEventListener("input", renderReports);
+
+    document.getElementById("statusFilter")
+        .addEventListener("change", renderReports);
+
+    document.getElementById("refreshBtn")
+        .addEventListener("click", loadReports);
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+        sessionStorage.removeItem("governmentAgent");
+        window.location.replace("government-agent-login.html");
+    });
+
+    if (agent) {
+        loadReports();
+    }
+</script>
+</body>
+</html>

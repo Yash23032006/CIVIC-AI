@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicAI | Sign In</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="auth-modern">
+
+    <div class="auth-wrapper">
+
+        <!-- Left Section -->
+        <div class="auth-visual">
+            <div class="brand">
+                <div class="brand-icon">🏙️</div>
+                <span>Civic<span>AI</span></span>
+            </div>
+
+            <div class="visual-content">
+                <p class="small-title">SMART CIVIC PLATFORM</p>
+
+                <h1>
+                    Make Your City<br>
+                    <span>Better Together.</span>
+                </h1>
+
+                <p>
+                    Report civic problems, track your requests,
+                    and help build a smarter and safer community.
+                </p>
+
+                <div class="visual-stats">
+                    <div>
+                        <strong>24/7</strong>
+                        <small>Available</small>
+                    </div>
+
+                    <div>
+                        <strong>AI</strong>
+                        <small>Powered</small>
+                    </div>
+
+                    <div>
+                        <strong>100%</strong>
+                        <small>Citizen Focused</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="city-line">
+                🏢 🏠 🌳 🏫 🏥 🚦
+            </div>
+        </div>
+
+
+        <!-- Right Section -->
+        <div class="auth-form-section">
+
+            <div class="auth-form-box">
+
+                <a href="index.html" class="back-home">
+                    ← Back to Home
+                </a>
+
+                <div class="form-heading">
+                    <p>WELCOME BACK</p>
+                    <h2>Sign In 👋</h2>
+                    <span>Access your CivicAI account</span>
+                </div>
+
+                <form id="loginForm">
+
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <div class="input-box">
+                            <span>✉️</span>
+                            <input
+                                type="email"
+                                id="loginEmail"
+                                placeholder="Enter your email"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="label-row">
+                            <label>Password</label>
+                            <a href="#">Forgot Password?</a>
+                        </div>
+
+                        <div class="input-box">
+                            <span>🔒</span>
+
+                            <input
+                                type="password"
+                                id="loginPassword"
+                                placeholder="Enter your password"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="show-password"
+                                onclick="togglePassword()">
+                                👁
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="modern-login-btn">
+                        Sign In
+                        <span>→</span>
+                    </button>
+
+                </form>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <p class="account-text">
+                    Don't have an account?
+                    <a href="signup.html">Create Account</a>
+                </p>
+                <p class="account-text" style="margin-top: 20px; text-align: center;">
+                    Are you a Government Agent?
+                  <a href="government-agent-login.html">
+                     🏛️ Login as Government Agent
+                  </a>
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+<script>
+
+function togglePassword() {
+
+    const password = document.getElementById("loginPassword");
+
+    if (password.type === "password") {
+        password.type = "text";
+    } else {
+        password.type = "password";
+    }
+}
+
+
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
+    // Check empty fields
+    if (!email || !password) {
+        alert("Please enter email and password.");
+        return;
+    }
+
+    try {
+
+        const response = await fetch("/api/login", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+
+        });
+
+        const result = await response.json();
+
+
+        // Successful login
+        if (response.ok) {
+
+            // Store only basic login information
+            sessionStorage.setItem("loggedIn", "true");
+            sessionStorage.setItem("userName", result.name);
+            sessionStorage.setItem("userEmail", result.email);
+
+            alert("Login successful! 🎉");
+
+            // Go to dashboard
+            window.location.href = "dashboard.html";
+
+        } else {
+
+            alert(result.message);
+
+        }
+
+    } catch (error) {
+
+        console.error("Login Error:", error);
+
+        alert(
+            "Unable to connect to CivicAI server.\n\n" +
+            "Please make sure backend.py is running."
+        );
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>

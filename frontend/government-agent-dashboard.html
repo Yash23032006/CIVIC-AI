@@ -1,0 +1,426 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicAI | Government Agent Dashboard</title>
+
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<style>
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+}
+header {
+    background: #102b4e;
+    color: white;
+    padding: 22px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+header h1 { margin: 0 0 8px; font-size: 25px; }
+header p { margin: 0; color: #dbeafe; }
+button {
+    padding: 11px 16px;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+.logout { background: #dc3545; color: white; }
+.refresh { background: #2563eb; color: white; }
+main { padding: 25px 5%; }
+.welcome, .card, .panel {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+    padding: 20px;
+    margin-bottom: 22px;
+    box-shadow: 0 3px 12px #0f172a0a;
+}
+.welcome {
+    background: linear-gradient(120deg, #163e68, #2563a6);
+    color: white;
+}
+.welcome p { line-height: 1.7; }
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 15px;
+    margin-bottom: 22px;
+}
+.card p { color: #64748b; margin: 0 0 10px; }
+.card h2 { margin: 0; font-size: 30px; }
+.panel h2 { margin-top: 0; }
+.filters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 18px 0;
+}
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: white;
+    font-size: 14px;
+}
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 800px; }
+th, td {
+    padding: 13px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    vertical-align: top;
+    font-size: 13px;
+}
+th { background: #f8fafc; color: #475569; }
+.status {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 15px;
+    background: #e2e8f0;
+}
+.status.pending { background: #fef3c7; color: #92400e; }
+.status.in-progress { background: #dbeafe; color: #1d4ed8; }
+.status.resolved { background: #dcfce7; color: #166534; }
+#message {
+    padding: 14px;
+    background: #f1f5f9;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+#error { color: #b91c1c; }
+#map { height: 380px; border-radius: 10px; }
+small { color: #64748b; }
+@media (max-width: 750px) {
+    main { padding: 18px 4%; }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .filters { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+<header>
+    <div>
+        <h1>🏛️ CivicAI Government Dashboard</h1>
+        <p>Citizen complaints and civic issue monitoring</p>
+    </div>
+    <button class="logout" id="logoutBtn">Logout</button>
+</header>
+
+<main>
+    <section class="welcome">
+        <h2 id="welcomeName">Welcome, Government Agent!</h2>
+        <p id="agentDetails">Loading agent information...</p>
+    </section>
+
+    <section class="stats">
+        <div class="card"><p>Total Complaints</p><h2 id="totalCount">—</h2></div>
+        <div class="card"><p>Pending</p><h2 id="pendingCount">—</h2></div>
+        <div class="card"><p>In Progress</p><h2 id="progressCount">—</h2></div>
+        <div class="card"><p>Resolved</p><h2 id="resolvedCount">—</h2></div>
+    </section>
+
+    <section class="panel">
+        <h2>📋 Citizen Complaints</h2>
+        <p><small>Reports loaded from the CivicAI backend.</small></p>
+
+        <div class="filters">
+            <input id="searchInput" type="search"
+                   placeholder="Search problem, ID or location">
+
+            <select id="cityFilter">
+                <option value="">All Cities / Locations</option>
+            </select>
+
+            <select id="statusFilter">
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="in progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+            </select>
+        </div>
+
+        <button class="refresh" id="refreshBtn">↻ Refresh Reports</button>
+        <div id="message">Loading complaints...</div>
+        <p id="error"></p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Complaint ID</th>
+                        <th>Problem</th>
+                        <th>Location</th>
+                        <th>Category</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Evidence</th>
+                    </tr>
+                </thead>
+                <tbody id="reportsBody"></tbody>
+            </table>
+        </div>
+        <p id="resultCount"></p>
+    </section>
+
+    <section class="panel">
+        <h2>📍 Complaint Location Map</h2>
+        <p><small>Map markers appear for reports that contain GPS latitude and longitude.</small></p>
+        <div id="map"></div>
+        <p id="mapMessage"><small>Loading map...</small></p>
+    </section>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const API_BASE = window.location.origin;
+let agent = null;
+let allReports = [];
+let map = null;
+let markers = null;
+
+try {
+    agent = JSON.parse(sessionStorage.getItem("governmentAgent") || "null");
+} catch (e) {
+    agent = null;
+}
+
+if (!agent) {
+    window.location.replace("government-agent-login.html");
+} else {
+    document.getElementById("welcomeName").textContent =
+        "Welcome, " + (agent.full_name || "Government Agent") + "!";
+
+    document.getElementById("agentDetails").textContent =
+        "Department: " + (agent.department || "Not specified") +
+        " | Employee ID: " + (agent.employee_id || "Not specified") +
+        " | Email: " + (agent.email || "Not specified");
+}
+
+document.getElementById("logoutBtn").addEventListener("click", () => {
+    sessionStorage.removeItem("governmentAgent");
+    window.location.replace("government-agent-login.html");
+});
+
+function safe(value) {
+    return String(value ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;",
+        '"': "&quot;", "'": "&#39;"
+    })[c]);
+}
+
+function normalizedStatus(value) {
+    return String(value || "").trim().toLowerCase().replace(/[_-]+/g, " ");
+}
+
+function dateText(value) {
+    if (!value) return "—";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime())
+        ? safe(value)
+        : safe(date.toLocaleDateString());
+}
+
+function updateStatistics(reports) {
+    document.getElementById("totalCount").textContent = reports.length;
+    document.getElementById("pendingCount").textContent =
+        reports.filter(r => normalizedStatus(r.status) === "pending").length;
+    document.getElementById("progressCount").textContent =
+        reports.filter(r => normalizedStatus(r.status) === "in progress").length;
+    document.getElementById("resolvedCount").textContent =
+        reports.filter(r => normalizedStatus(r.status) === "resolved").length;
+}
+
+function updateCityOptions() {
+    const select = document.getElementById("cityFilter");
+    const previous = select.value;
+    const cities = [...new Set(allReports
+        .map(r => String(r.location || "").trim())
+        .filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+    select.replaceChildren(new Option("All Cities / Locations", ""));
+    cities.forEach(city => select.add(new Option(city, city)));
+
+    if (cities.includes(previous)) select.value = previous;
+}
+
+function renderReports() {
+    const search = document.getElementById("searchInput").value.trim().toLowerCase();
+    const city = document.getElementById("cityFilter").value.toLowerCase();
+    const status = document.getElementById("statusFilter").value;
+
+    const filtered = allReports.filter(r => {
+        const searchable = [
+            r.id, r.problem, r.location, r.category, r.citizen_email
+        ].join(" ").toLowerCase();
+
+        return searchable.includes(search) &&
+            String(r.location || "").toLowerCase() === city ||
+            (searchable.includes(search) && !city &&
+             (!status || normalizedStatus(r.status) === status)) ||
+            (searchable.includes(search) &&
+             String(r.location || "").toLowerCase() === city &&
+             (!status || normalizedStatus(r.status) === status));
+    });
+
+    // Apply each filter together consistently.
+    const finalFiltered = allReports.filter(r => {
+        const searchable = [
+            r.id, r.problem, r.location, r.category, r.citizen_email
+        ].join(" ").toLowerCase();
+
+        return searchable.includes(search) &&
+            (!city || String(r.location || "").toLowerCase() === city) &&
+            (!status || normalizedStatus(r.status) === status);
+    });
+
+    const body = document.getElementById("reportsBody");
+
+    if (!finalFiltered.length) {
+        body.innerHTML = '<tr><td colspan="8">No matching complaints found.</td></tr>';
+    } else {
+        body.innerHTML = finalFiltered.map(r => {
+            const s = normalizedStatus(r.status);
+            const statusClass = s === "pending" ? "pending" :
+                s === "in progress" ? "in-progress" :
+                s === "resolved" ? "resolved" : "";
+
+            const photos = Array.isArray(r.evidence_photos) ? r.evidence_photos : [];
+            const links = photos.map((p, i) => {
+                const url = typeof p === "object" && p ? p.view_url : "";
+                return url
+                    ? '<a href="' + safe(url) +
+                      '" target="_blank" rel="noopener noreferrer">Photo ' +
+                      (i + 1) + '</a>'
+                    : "";
+            }).filter(Boolean).join("<br>");
+
+            const priority = Number(r.priority_score || 0);
+            return `<tr>
+                <td>${safe(r.id || "—")}</td>
+                <td>${safe(r.problem || "—")}</td>
+                <td>${safe(r.location || "—")}</td>
+                <td>${safe(r.category || "Uncategorized")}</td>
+                <td>${priority ? priority + "/100" : "—"}</td>
+                <td><span class="status ${statusClass}">${safe(r.status || "Unknown")}</span></td>
+                <td>${dateText(r.created_at)}</td>
+                <td>${links || "—"}</td>
+            </tr>`;
+        }).join("");
+    }
+
+    document.getElementById("resultCount").textContent =
+        `Showing ${finalFiltered.length} of ${allReports.length} complaints.`;
+    updateMap(finalFiltered);
+}
+
+function initMap() {
+    const mapMessage = document.getElementById("mapMessage");
+    if (!window.L) {
+        mapMessage.textContent = "Map library could not load. Check your internet connection.";
+        return;
+    }
+    map = L.map("map").setView([18.5204, 73.8567], 10);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+    markers = L.featureGroup().addTo(map);
+    mapMessage.textContent = "Showing GPS-tagged complaints when available.";
+}
+
+function updateMap(reports) {
+    const mapMessage = document.getElementById("mapMessage");
+    if (!map || !markers) return;
+
+    markers.clearLayers();
+    const points = [];
+
+    reports.forEach(r => {
+        const lat = Number(r.latitude);
+        const lon = Number(r.longitude);
+
+        if (r.latitude == null || r.longitude == null ||
+            r.latitude === "" || r.longitude === "" ||
+            !Number.isFinite(lat) || !Number.isFinite(lon) ||
+            Math.abs(lat) > 90 || Math.abs(lon) > 180) return;
+
+        const marker = L.marker([lat, lon]).bindPopup(
+            "<b>Complaint:</b> " + safe(r.id || "—") +
+            "<br><b>Problem:</b> " + safe(r.problem || "—") +
+            "<br><b>Location:</b> " + safe(r.location || "—") +
+            "<br><b>Status:</b> " + safe(r.status || "Unknown")
+        );
+        markers.addLayer(marker);
+        points.push([lat, lon]);
+    });
+
+    if (points.length) {
+        map.fitBounds(points, {padding: [25, 25], maxZoom: 14});
+        mapMessage.textContent = "Map markers: " + points.length;
+    } else {
+        map.setView([18.5204, 73.8567], 10);
+        mapMessage.textContent =
+            "No GPS coordinates found for the currently filtered complaints.";
+    }
+}
+
+async function loadReports() {
+    const message = document.getElementById("message");
+    const error = document.getElementById("error");
+    const button = document.getElementById("refreshBtn");
+
+    message.style.display = "block";
+    message.textContent = "Loading complaints...";
+    error.textContent = "";
+    button.disabled = true;
+
+    try {
+        const response = await fetch(API_BASE + "/api/government-agent/reports");
+        const data = await response.json();
+
+        if (!response.ok || data.status !== "success") {
+            throw new Error(data.message || "Unable to load complaints.");
+        }
+
+        allReports = Array.isArray(data.reports) ? data.reports : [];
+        updateStatistics(allReports);
+        updateCityOptions();
+        renderReports();
+        message.textContent = allReports.length
+            ? "Complaints loaded successfully."
+            : "No complaints have been submitted yet.";
+    } catch (e) {
+        message.textContent = "Could not load complaints.";
+        error.textContent = e.message +
+            " Check Flask backend, API route and Supabase connection.";
+    } finally {
+        button.disabled = false;
+    }
+}
+
+document.getElementById("searchInput").addEventListener("input", renderReports);
+document.getElementById("cityFilter").addEventListener("change", renderReports);
+document.getElementById("statusFilter").addEventListener("change", renderReports);
+document.getElementById("refreshBtn").addEventListener("click", loadReports);
+
+if (agent) {
+    initMap();
+    loadReports();
+}
+</script>
+</body>
+</html>

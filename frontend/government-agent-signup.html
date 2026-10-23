@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicAI | Government Agent Signup</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-modern">
+
+    <div class="auth-wrapper">
+        <div class="auth-form-section">
+            <div class="auth-form-box">
+
+                <a href="government-agent-login.html">
+                    ← Back to Agent Login
+                </a>
+
+                <h2>🏛️ Government Agent Sign Up</h2>
+                <p>Create your Government Agent account.</p>
+
+                <form id="agentSignupForm">
+
+                    <div class="input-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name"
+                               placeholder="Enter full name" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email"
+                               placeholder="Enter email" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="department">Department</label>
+                        <input type="text" id="department"
+                               placeholder="Enter department" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="employeeId">Employee ID</label>
+                        <input type="text" id="employeeId"
+                               placeholder="Enter employee ID" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password"
+                               placeholder="Create password"
+                               minlength="8" required>
+                    </div>
+
+                    <button type="submit" class="modern-login-btn">
+                        Create Agent Account
+                    </button>
+
+                    <p id="message"></p>
+                </form>
+
+                <p class="account-text">
+                    Already registered?
+                    <a href="government-agent-login.html">
+                        Login
+                    </a>
+                </p>
+
+            </div>
+        </div>
+    </div>
+
+    <
+<script>
+    document.getElementById("agentSignupForm")
+        .addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const message = document.getElementById("message");
+            const button = this.querySelector('button[type="submit"]');
+
+            const payload = {
+                full_name: document.getElementById("name").value.trim(),
+                email: document.getElementById("email").value.trim(),
+                department: document.getElementById("department").value.trim(),
+                employee_id: document.getElementById("employeeId").value.trim(),
+                password: document.getElementById("password").value
+            };
+
+            message.textContent = "Creating your account...";
+            button.disabled = true;
+
+            try {
+                const response = await fetch("/api/government-agent/signup", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                message.textContent = result.message ||
+                    (response.ok ? "Registration successful." : "Registration failed.");
+
+                if (response.ok) {
+                    this.reset();
+
+                    // Allow the user to read the confirmation before navigating.
+                    setTimeout(() => {
+                        window.location.href = "government-agent-login.html";
+                    }, 2000);
+                }
+            } catch (error) {
+                message.textContent =
+                    "Could not connect to the server. Please try again.";
+                console.error("Agent signup error:", error);
+            } finally {
+                button.disabled = false;
+            }
+        });
+</script>
+
+
+</body>
+</html>

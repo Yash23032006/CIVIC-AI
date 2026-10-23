@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CivicAI - Citizen Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+
+        <div class="logo">
+            <div class="logo-icon">🏛️</div>
+
+            <div>
+                <h2>CivicAI</h2>
+                <span>Citizen Development Intelligence</span>
+            </div>
+        </div>
+
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="index.html#report">Report Issue</a>
+            <a href="#myReports" onclick="showMyReports(event)">
+                My Reports
+            </a>
+
+            <button
+                class="language-btn"
+                onclick="logout()">
+                Logout
+            </button>
+        </div>
+
+    </nav>
+
+
+    <!-- DASHBOARD -->
+
+    <main class="dashboard">
+
+        <div class="dashboard-heading">
+
+            <div>
+                <span class="section-label">
+                    CITIZEN PORTAL
+                </span>
+
+                <h1>Welcome to CivicAI 👋</h1>
+
+                <p>
+                    Monitor your civic reports and contribute
+                    to a better community.
+                </p>
+            </div>
+
+            <a
+                href="index.html#report"
+                class="primary-btn">
+
+                + Report New Issue
+
+            </a>
+
+        </div>
+
+
+        <!-- STATISTICS -->
+
+        <div class="dashboard-stats">
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-icon">
+                    📝
+                </div>
+
+                <h2 id="totalReports">0</h2>
+<p>Total Reports</p> 
+
+            </div>
+
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-icon">
+                    ⏳
+                </div>
+
+                <h2 id="pendingReports">0</h2>
+<p>Pending</p>
+
+            </div>
+
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-icon">
+                    ✅
+                </div>
+
+                <h2 id="resolvedReports">0</h2>
+<p>Resolved</p>
+
+            </div>
+
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-icon">
+                    🚨
+                </div>
+
+                <h2 id="highPriorityReports">0</h2>
+<p>High Priority</p>
+
+            </div>
+
+            <div class="dashboard-card">
+
+    <div class="dashboard-icon">
+        🔄
+    </div>
+
+    <h2 id="inProgressReports">0</h2>
+    <p>In Progress</p>
+
+</div>
+
+        </div>
+
+
+        <!-- RECENT REPORTS -->
+
+        <section class="reports-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <h2>Recent Reports</h2>
+
+                    <p>
+                        Your recently submitted civic issues
+                    </p>
+                </div>
+
+                <a href="#cityReports" onclick="showCityReports()">
+                    View City based Report
+                </a>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Issue</th>
+                            <th>Category</th>
+                            <th>Location</th>
+                            <th>Severity</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="reportsTableBody">
+
+    <tr>
+        <td colspan="6">
+            Loading reports...
+        </td>
+    </tr>
+
+</tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- CITY BASED REPORTS -->
+
+<section class="reports-panel" id="cityReports" style="display: none;">
+
+    <div class="panel-header">
+
+        <div>
+            <h2>📍 Reports by City</h2>
+
+            <p>
+                Enter your city or village to view civic reports from your area.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- CITY SEARCH -->
+
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+
+        <input
+            type="text"
+            id="citySearch"
+            placeholder="Enter city / village"
+            style="flex: 1; padding: 12px;">
+
+        <button
+            type="button"
+            class="primary-btn"
+            onclick="searchCityReports()">
+
+            🔍 View Reports
+
+        </button>
+
+    </div>
+
+
+    <!-- SEARCH MESSAGE -->
+
+    <div id="cityReportMessage"></div>
+
+    <div
+    id="cityIntelligence"
+    style="
+        display: none;
+        margin-bottom: 20px;
+    "
+>
+
+    <div class="dashboard-stats">
+
+        <div class="dashboard-card">
+            <div class="dashboard-icon">📝</div>
+            <h2 id="cityTotalReports">0</h2>
+            <p>Total Reports</p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-icon">🚨</div>
+            <h2 id="cityHighPriority">0</h2>
+            <p>High Priority</p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-icon">⏳</div>
+            <h2 id="cityPending">0</h2>
+            <p>Pending</p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-icon">🤖</div>
+            <h2
+                id="cityTopCategory"
+                style="font-size: 18px;"
+            >
+                -
+            </h2>
+            <p>Top Issue</p>
+        </div>
+
+    </div>
+
+</div>
+
+
+    <!-- CITY REPORTS TABLE -->
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Issue</th>
+                    <th>Category</th>
+                    <th>Location</th>
+                    <th>Severity</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                </tr>
+
+            </thead>
+
+
+            <tbody id="cityReportsTableBody">
+
+                <tr>
+                    <td colspan="6">
+                        Enter your city to view reports.
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<!-- MY REPORTS -->
+
+<section class="reports-panel" id="myReports" style="display: none;">
+
+    <div class="panel-header">
+
+        <div>
+
+            <h2>📋 My Reports</h2>
+
+            <p>
+                Track all civic issues submitted by you.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- REPORT COUNT MESSAGE -->
+
+    <div id="trackingMessage"
+         style="margin-bottom: 20px; font-size: 18px;">
+
+    </div>
+
+
+    <!-- MY REPORTS TABLE -->
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Report ID</th>
+
+                    <th>Issue</th>
+
+                    <th>Category</th>
+
+                    <th>Location</th>
+
+                    <th>Severity</th>
+
+                    <th>Priority</th>
+
+                    <th>Status</th>
+
+                    <th>Submitted</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="myReportsTableBody">
+
+                <tr>
+
+                    <td colspan="8">
+                        Loading your reports...
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+        <!-- QUICK ACTIONS -->
+
+        <section class="quick-section">
+
+            <h2>Quick Actions</h2>
+
+            <div class="quick-grid">
+
+                <a
+                    href="index.html#report"
+                    class="quick-card">
+
+                    <span>🚨</span>
+
+                    <div>
+                        <h3>Report an Issue</h3>
+
+                        <p>
+                            Submit a new civic complaint.
+                        </p>
+                    </div>
+
+                </a>
+
+
+                <a
+    href="#myReports"
+    class="quick-card"
+    onclick="showMyReports()">
+                    <span>📊</span>
+
+                    <div>
+                        <h3>View My Reports</h3>
+
+                        <p>
+                            Track your submitted issues.
+                        </p>
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="#"
+                    class="quick-card">
+
+                    <span>🤖</span>
+
+                    <div>
+                        <h3>AI Insights</h3>
+
+                        <p>
+                            Understand issue priorities.
+                        </p>
+                    </div>
+
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script>
+
+    // ==============================
+// LOGIN PROTECTION
+// ==============================
+
+const loggedIn =
+    sessionStorage.getItem("loggedIn");
+
+if (loggedIn !== "true") {
+
+    window.location.href = "login.html";
+
+}
+
+    function logout() {
+
+    sessionStorage.removeItem("loggedIn");
+    sessionStorage.removeItem("userName");
+    sessionStorage.removeItem("userEmail");
+
+    window.location.href = "login.html";
+
+}
+
+
+    // ==============================
+    // LOAD DASHBOARD DATA
+    // ==============================
+
+    async function loadDashboard() {
+
+        try {
+
+            const response = await fetch("/api/reports");
+
+            const data = await response.json();
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.message || "Failed to load reports"
+                );
+
+            }
+
+
+            // Update statistics
+
+            document.getElementById("totalReports").textContent =
+                data.total_reports;
+
+            document.getElementById("pendingReports").textContent =
+                data.pending;
+
+            document.getElementById("resolvedReports").textContent =
+                data.resolved;
+
+            document.getElementById("highPriorityReports").textContent =
+                data.high_priority;
+            document.getElementById("inProgressReports").textContent =
+                data.in_progress;
+
+
+            // Update recent reports table
+
+            const tableBody =
+                document.getElementById("reportsTableBody");
+
+            tableBody.innerHTML = "";
+
+
+            if (data.reports.length === 0) {
+
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6">
+                            No reports submitted yet.
+                        </td>
+                    </tr>
+                `;
+
+                return;
+
+            }
+
+
+            data.reports.forEach(report => {
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+
+    <td>${escapeHTML(report.problem)}</td>
+
+    <td>${escapeHTML(report.category)}</td>
+
+    <td>${escapeHTML(report.location)}</td>
+
+    <td>
+        <span class="status ${getSeverityClass(report.severity)}">
+            ${escapeHTML(report.severity)}
+        </span>
+    </td>
+
+    <td>
+        <strong>${escapeHTML(report.priority_score)}/100</strong>
+    </td>
+
+    <td>
+        <span class="status ${getStatusClass(report.status)}">
+            ${escapeHTML(report.status)}
+        </span>
+    </td>
+
+`;
+
+                tableBody.appendChild(row);
+
+            });
+
+
+        } catch (error) {
+
+            console.error("Dashboard error:", error);
+
+            document.getElementById("reportsTableBody").innerHTML = `
+
+                <tr>
+                    <td colspan="6">
+                        Unable to load reports.
+                    </td>
+                </tr>
+
+            `;
+
+        }
+
+    }
+
+
+    // ==============================
+    // HELPER FUNCTIONS
+    // ==============================
+
+    function escapeHTML(value) {
+
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+    }
+
+
+    function getSeverityClass(severity) {
+
+        const value = String(severity).toLowerCase();
+
+        if (value === "high") return "high";
+
+        if (value === "medium") return "medium";
+
+        return "low";
+
+    }
+
+
+    function getStatusClass(status) {
+
+        const value = String(status).toLowerCase();
+
+        if (value === "resolved") return "resolved";
+
+        if (value === "in progress") return "progress-status";
+
+        return "pending";
+
+    }
+
+
+    // Load data when dashboard opens
+
+    loadDashboard();
+
+    // ==============================
+// CITY BASED REPORTS
+// ==============================
+
+function showCityReports() {
+
+    const cityReportsSection =
+        document.getElementById("cityReports");
+
+    cityReportsSection.style.display = "block";
+
+    cityReportsSection.scrollIntoView({
+        behavior: "smooth"
+    });
+
+}
+
+
+async function searchCityReports() {
+
+    const city =
+        document.getElementById("citySearch").value.trim();
+
+    const tableBody =
+        document.getElementById("cityReportsTableBody");
+
+    const message =
+        document.getElementById("cityReportMessage");
+    const intelligence =
+    document.getElementById("cityIntelligence");
+
+
+    // Check empty city
+
+    if (city === "") {
+
+        message.innerHTML =
+            "<p>Please enter a city or village name.</p>";
+
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6">
+                    Enter your city to view reports.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    // Show loading message
+
+    message.innerHTML =
+        "<p>🔄 Searching reports for " +
+        escapeHTML(city) +
+        "...</p>";
+
+
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="6">
+                Searching...
+            </td>
+        </tr>
+    `;
+
+
+    try {
+
+        const response = await fetch(
+            "/api/reports/city?city=" +
+            encodeURIComponent(city)
+        );
+
+
+        const data = await response.json();
+
+if (!response.ok) {
+
+    throw new Error(
+        data.message ||
+        "Failed to search reports."
+    );
+
+}
+
+
+// Update city intelligence
+document.getElementById("cityTotalReports").textContent =
+    data.total_reports;
+
+document.getElementById("cityHighPriority").textContent =
+    data.high_priority;
+
+document.getElementById("cityPending").textContent =
+    data.pending;
+
+document.getElementById("cityTopCategory").textContent =
+    data.top_category;
+
+intelligence.style.display = "block";
+
+
+        tableBody.innerHTML = "";
+
+
+        // No reports found
+
+        if (!data.reports || data.reports.length === 0) {
+            
+            intelligence.style.display = "none";
+            message.innerHTML =
+                "<p>❌ No civic reports found for " +
+                escapeHTML(city) +
+                ".</p>";
+
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6">
+                        No reports found for this city.
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+
+        // Reports found
+
+        message.innerHTML =
+            "<p>📍 Found " +
+            data.total_reports +
+            " report(s) from " +
+            escapeHTML(data.city) +
+            ".</p>";
+
+
+        // Display reports
+
+        data.reports.forEach(report => {
+
+            const row =
+                document.createElement("tr");
+
+
+            row.innerHTML = `
+
+    <td>
+        ${escapeHTML(report.problem)}
+    </td>
+
+    <td>
+        ${escapeHTML(report.category)}
+    </td>
+
+    <td>
+        ${escapeHTML(report.location)}
+    </td>
+
+    <td>
+        <span class="status ${getSeverityClass(report.severity)}">
+            ${escapeHTML(report.severity)}
+        </span>
+    </td>
+
+    <td>
+        <strong>${escapeHTML(report.priority_score)}/100</strong>
+    </td>
+
+    <td>
+        <span class="status ${getStatusClass(report.status)}">
+            ${escapeHTML(report.status)}
+        </span>
+    </td>
+
+`;
+
+            tableBody.appendChild(row);
+
+        });
+
+
+    } catch (error) {
+        intelligence.style.display = "none";
+
+        console.error(
+            "City report search error:",
+            error
+        );
+
+
+        message.innerHTML =
+            "<p>❌ Unable to search reports.</p>";
+
+
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6">
+                    Unable to load city reports.
+                </td>
+            </tr>
+        `;
+
+    }
+
+}
+
+// ==============================
+// MY REPORTS / REQUEST TRACKING
+// ==============================
+
+function showMyReports(event) {
+
+    if (event) {
+        event.preventDefault();
+    }
+
+    const section =
+        document.getElementById("myReports");
+
+    section.style.display = "block";
+
+    section.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+    loadMyReports();
+}
+
+async function loadMyReports() {
+
+    const citizenEmail =
+        sessionStorage.getItem("userEmail");
+
+    const message =
+        document.getElementById(
+            "trackingMessage"
+        );
+
+    const tableBody =
+        document.getElementById(
+            "myReportsTableBody"
+        );
+
+
+    if (!citizenEmail) {
+
+        message.innerHTML =
+            "<p>⚠️ Please login to view your reports.</p>";
+
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="8">
+                    Please login to view your reports.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    try {
+
+        const response = await fetch(
+            "/api/my-reports?citizen_email=" +
+            encodeURIComponent(citizenEmail)
+        );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load your reports."
+            );
+
+        }
+
+
+        tableBody.innerHTML = "";
+
+
+        if (
+            !data.reports ||
+            data.reports.length === 0
+        ) {
+
+            message.innerHTML =
+                "<p>📋 You have not submitted any reports yet.</p>";
+
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8">
+                        No reports submitted yet.
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+
+        message.innerHTML =
+            "<p>📋 You have submitted <strong>" +
+            data.total_reports +
+            "</strong> report(s).</p>";
+
+
+        data.reports.forEach(report => {
+
+            const row =
+                document.createElement("tr");
+
+
+            row.innerHTML = `
+
+                <td>
+                    <strong>#${escapeHTML(report.id)}</strong>
+                </td>
+
+
+                <td>
+                    ${escapeHTML(report.problem)}
+                </td>
+
+
+                <td>
+                    ${escapeHTML(report.category)}
+                </td>
+
+
+                <td>
+                    ${escapeHTML(report.location)}
+                </td>
+
+
+                <td>
+
+                    <span class="status ${getSeverityClass(report.severity)}">
+
+                        ${escapeHTML(report.severity)}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <strong>
+                        ${escapeHTML(report.priority_score)}/100
+                    </strong>
+
+                </td>
+
+
+                <td>
+
+                    <span class="status ${getStatusClass(report.status)}">
+
+                        ${escapeHTML(report.status)}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+                    ${escapeHTML(report.created_at)}
+                </td>
+
+            `;
+
+
+            tableBody.appendChild(row);
+
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            "My Reports error:",
+            error
+        );
+
+
+        message.innerHTML =
+            "<p>❌ Unable to load your reports.</p>";
+
+
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="8">
+                    Unable to load your reports.
+                </td>
+            </tr>
+        `;
+
+    }
+
+}
+
+
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CivicAI | Create Account</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="auth-modern">
+
+<div class="auth-wrapper">
+
+    <!-- Left Visual -->
+    <div class="auth-visual">
+
+        <div class="brand">
+            <div class="brand-icon">🏙️</div>
+
+            <span>
+                Civic<span>AI</span>
+            </span>
+        </div>
+
+        <div class="visual-content">
+
+            <p class="small-title">
+                JOIN THE COMMUNITY
+            </p>
+
+            <h1>
+                Your Voice.<br>
+                <span>Your City.</span>
+            </h1>
+
+            <p>
+                Join CivicAI and make it easier to report,
+                track and improve civic issues in your community.
+            </p>
+
+            <div class="feature-list">
+
+                <div>
+                    <span>✓</span>
+                    Report civic issues easily
+                </div>
+
+                <div>
+                    <span>✓</span>
+                    Track your complaints
+                </div>
+
+                <div>
+                    <span>✓</span>
+                    AI-assisted issue analysis
+                </div>
+
+                <div>
+                    <span>✓</span>
+                    Help improve your community
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="city-line">
+            🏢 🏠 🌳 🏫 🏥 🚦
+        </div>
+
+    </div>
+
+
+    <!-- Sign Up Form -->
+    <div class="auth-form-section">
+
+        <div class="auth-form-box signup-box">
+
+            <a href="index.html" class="back-home">
+                ← Back to Home
+            </a>
+
+            <div class="form-heading">
+
+                <p>GET STARTED</p>
+
+                <h2>Create Account ✨</h2>
+
+                <span>
+                    Join CivicAI today
+                </span>
+
+            </div>
+
+
+            <form id="signupForm">
+
+                <div class="input-group">
+
+                    <label>Full Name</label>
+
+                    <div class="input-box">
+
+                        <span>👤</span>
+
+                        <input
+                            type="text"
+                            id="name"
+                            placeholder="Enter your full name"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label>Email Address</label>
+
+                    <div class="input-box">
+
+                        <span>✉️</span>
+
+                        <input
+                            type="email"
+                            id="email"
+                            placeholder="Enter your email"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label>Mobile Number</label>
+
+                    <div class="input-box">
+
+                        <span>📱</span>
+
+                        <input
+                            type="tel"
+                            id="mobile"
+                            placeholder="Enter mobile number"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label>Password</label>
+
+                    <div class="input-box">
+
+                        <span>🔒</span>
+
+                        <input
+                            type="password"
+                            id="password"
+                            placeholder="Create a password"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label>Confirm Password</label>
+
+                    <div class="input-box">
+
+                        <span>🔐</span>
+
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            placeholder="Confirm your password"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <button type="submit" class="modern-login-btn">
+
+                    Create Account
+
+                    <span>→</span>
+
+                </button>
+
+            </form>
+
+
+            <div class="divider">
+                <span>OR</span>
+            </div>
+
+
+            <p class="account-text">
+
+                Already have an account?
+
+                <a href="login.html">
+                    Sign In
+                </a>
+
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+document.getElementById("signupForm").addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+
+    // Get form values
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const mobile = document.getElementById("mobile").value.trim();
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+
+
+    // Check password
+    if (password !== confirmPassword) {
+
+        alert("Passwords do not match!");
+
+        return;
+    }
+
+
+    // Send data to Flask backend
+    try {
+
+        const response = await fetch(
+            "http://127.0.0.1:5000/api/signup",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                    mobile: mobile,
+                    password: password
+                })
+            }
+        );
+
+
+        const result = await response.json();
+
+
+        // Successful signup
+        if (response.ok) {
+
+            alert("Account created successfully! 🎉");
+
+            window.location.href = "login.html";
+
+        }
+
+        // Backend error
+        else {
+
+            alert(result.message);
+
+        }
+
+
+    }
+
+    // Backend connection error
+    catch (error) {
+
+        alert(
+            "Unable to connect to CivicAI server.\n\n" +
+            "Please make sure backend.py is running."
+        );
+
+        console.error("Backend Error:", error);
+
+    }
+
+});
+
+</script>
+
+
+</body>
+</html>

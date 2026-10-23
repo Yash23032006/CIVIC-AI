@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CivicAI - Citizen Development Intelligence</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+
+        <div class="logo">
+            <div class="logo-icon">🏛️</div>
+
+            <div>
+                <h2>CivicAI</h2>
+                <span>Citizen Development Intelligence</span>
+            </div>
+        </div>
+
+        <div class="nav-links">
+    <a href="#home">Home</a>
+    <a href="#report">Report Issue</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="#about">About</a>
+    <button class="language-btn">🌐 English</button>
+</div>
+
+    </nav>
+
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="home">
+
+        <div class="hero-content">
+
+            <div class="badge">
+                ✨ AI-Powered Civic Intelligence
+            </div>
+
+            <h1>
+                Empower Citizens.<br>
+                <span>Improve Communities.</span>
+            </h1>
+
+            <p>
+                CivicAI helps citizens report local problems and enables
+                communities to identify and prioritize important development
+                needs.
+            </p>
+
+            <div class="hero-buttons">
+                <a href="#report" class="primary-btn">
+                    🚨 Report a Civic Issue
+                </a>
+
+                <a href="#about" class="secondary-btn">
+                    Learn More →
+                </a>
+            </div>
+
+        </div>
+
+
+        <div class="hero-card">
+
+            <div class="card-header">
+                <span>📊 Civic Overview</span>
+                <span class="live">● Live</span>
+            </div>
+
+            <div class="stats">
+
+    <div class="stat-box">
+        <h2 id="homeTotalReports">0</h2>
+        <p>Total Reports</p>
+    </div>
+
+    <div class="stat-box">
+        <h2 id="homeResolvedReports">0</h2>
+        <p>Resolved</p>
+    </div>
+
+    <div class="stat-box">
+        <h2 id="homeHighPriorityReports">0</h2>
+        <p>High Priority</p>
+    </div>
+
+</div>
+
+            <div class="progress-section">
+
+                <div class="progress-title">
+    <span>Community Response</span>
+    <b id="homeResponsePercentage">0%</b>
+</div>
+
+                <div class="progress">
+                    <div class="progress-bar"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- REPORT SECTION -->
+    <section class="report-section" id="report">
+
+        <div class="section-heading">
+
+            <span class="section-label">
+                CIVIC ISSUE REPORTING
+            </span>
+
+            <h2>Tell Us About Your Problem</h2>
+
+            <p>
+                Your report helps identify problems and improve your community.
+            </p>
+
+        </div>
+
+
+        <div class="report-container">
+
+            <form id="issueForm">
+
+                <!-- Problem -->
+                <div class="form-group">
+
+                    <label for="problem">
+                        Describe your problem
+                    </label>
+
+                    <div style="display: flex; gap: 10px; align-items: stretch;">
+
+    <textarea
+        id="problem"
+        placeholder="Example: The road near our village hospital is damaged..."
+        required
+        style="flex: 1;">
+    </textarea>
+
+    <button
+        type="button"
+        id="micButton"
+        title="Speak your problem"
+        style="
+            width: 55px;
+            min-width: 55px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            background: #f1f5f9;
+        ">
+        🎤
+    </button>
+
+</div>
+<p id="micStatus" class="field-help" role="status" aria-live="polite">
+</p>
+
+                </div>
+
+
+                <!-- Row -->
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="language">
+                            Language
+                        </label>
+
+                        <select id="language">
+
+                            <option value="English">
+                                English
+                            </option>
+
+                            <option value="Hindi">
+                                Hindi
+                            </option>
+
+                            <option value="Marathi">
+                                Marathi
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <div class="form-group">
+
+                        <label for="location">
+                            📍 Location
+                        </label>
+
+                        <input
+                            type="text"
+                            id="location"
+                            placeholder="Enter your city / village"
+                            required>
+
+                    </div>
+
+                </div>
+
+                
+<!-- Optional photo evidence -->
+<div class="form-group">
+    <label for="evidencePhotos">📷 Photo Evidence (Optional)</label>
+    <input
+        type="file"
+        id="evidencePhotos"
+        accept="image/jpeg,image/png,image/webp"
+        multiple
+    >
+    <p class="field-help">
+        Attach up to 4 photos (JPEG, PNG or WebP; maximum 5 MB each).
+    </p>
+    <div id="photoPreview" class="photo-preview"></div>
+</div>
+
+<!-- Optional GPS location -->
+<div class="form-group gps-panel">
+    <label>🛰️ GPS Location (Optional)</label>
+    <button type="button" id="captureGps" class="gps-btn">
+        Use My Current Location
+    </button>
+    <p id="gpsStatus" class="field-help" role="status">
+        GPS not captured. You can still enter your city or village above.
+    </p>
+    <button type="button" id="clearGps" class="gps-clear">
+        Clear GPS coordinates
+    </button>
+    <input type="hidden" id="latitude">
+    <input type="hidden" id="longitude">
+    <input type="hidden" id="gpsAccuracy">
+</div>
+
+
+                <button
+                    type="submit"
+                    class="submit-btn">
+
+                    🚀 Submit Civic Issue
+
+                </button>
+
+            </form>
+
+
+            <!-- AI PREVIEW -->
+            <div class="ai-card">
+
+                <div class="ai-icon">
+                    🤖
+                </div>
+
+                <h3>AI-Assisted Analysis</h3>
+
+                <p>
+                    CivicAI can analyze reported problems and help classify
+                    them according to category and priority.
+                </p>
+
+
+                <div class="ai-feature">
+                    <span>✓</span>
+                    Problem Categorization
+                </div>
+
+                <div class="ai-feature">
+                    <span>✓</span>
+                    Severity Assessment
+                </div>
+
+                <div class="ai-feature">
+                    <span>✓</span>
+                    Priority Identification
+                </div>
+
+                <div class="ai-feature">
+                    <span>✓</span>
+                    Location-Based Analysis
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ABOUT -->
+    <section class="about-section" id="about">
+
+        <div class="section-heading">
+
+            <span class="section-label">
+                ABOUT CIVICAI
+            </span>
+
+            <h2>Building Better Communities Together</h2>
+
+            <p>
+                CivicAI provides a simple platform for citizens to communicate
+                local development issues and support data-driven civic
+                decision-making.
+            </p>
+
+        </div>
+
+
+        <div class="feature-grid">
+
+            <div class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3>Easy Reporting</h3>
+                <p>
+                    Report civic problems quickly using a simple interface.
+                </p>
+            </div>
+
+
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI Analysis</h3>
+                <p>
+                    Analyze complaints based on category and severity.
+                </p>
+            </div>
+
+
+            <div class="feature-card">
+                <div class="feature-icon">📍</div>
+                <h3>Location Awareness</h3>
+                <p>
+                    Understand where civic problems are occurring.
+                </p>
+            </div>
+
+
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Data Insights</h3>
+                <p>
+                    Organize citizen reports for better decision-making.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer>
+
+        <div class="footer-logo">
+            🏛️ <b>CivicAI</b>
+        </div>
+
+        <p>
+            Citizen Development Intelligence Platform
+        </p>
+
+        <p class="copyright">
+            © 2026 CivicAI. Built for smarter communities.
+        </p>
+
+    </footer>
+
+
+    <script src="script.js?v=3"></script>
+
+    <script>
+
+
+const micButton = document.getElementById("micButton");
+const problemInput = document.getElementById("problem");
+
+const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+if (SpeechRecognition) {
+
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = "en-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    let isListening = false;
+
+micButton.addEventListener("click", function () {
+
+    if (isListening) {
+        return;
+    }
+
+    try {
+
+        recognition.start();
+
+        isListening = true;
+
+        micButton.textContent = "🔴";
+        micButton.title = "Listening...";
+
+    } catch (error) {
+
+        console.error("Microphone start error:", error);
+
+    }
+
+});
+
+
+    recognition.onresult = function (event) {
+
+        const transcript =
+            event.results[0][0].transcript;
+
+        problemInput.value = transcript;
+
+        micButton.textContent = "🎤";
+        micButton.title = "Speak your problem";
+
+    };
+
+    recognition.onerror = function (event) {
+
+    console.error("Speech recognition error:", event.error);
+
+    micButton.textContent = "🎤";
+    micButton.title = "Speak your problem";
+
+    if (event.error === "not-allowed") {
+
+        alert("Microphone permission is blocked. Please allow microphone access for this website.");
+
+    } else if (event.error === "no-speech") {
+
+        alert("No speech detected. Please speak clearly after clicking the microphone.");
+
+    } else if (event.error === "audio-capture") {
+
+        alert("No microphone was detected. Please check your microphone connection.");
+
+    } else if (event.error === "network") {
+
+        alert("Speech recognition requires a network connection. Please check your internet connection.");
+
+    } else {
+
+        alert("Speech recognition error: " + event.error);
+
+    }
+
+};
+
+    recognition.onend = function () {
+
+    isListening = false;
+
+    micButton.textContent = "🎤";
+    micButton.title = "Speak your problem";
+
+};
+
+} else {
+
+    micButton.disabled = true;
+    micButton.title = "Speech recognition is not supported in this browser.";
+
+}
+
+</script>
+
+
+<script>
+
+// ==============================
+// LOAD LIVE CIVIC STATISTICS
+// ==============================
+
+async function loadHomeStatistics() {
+
+    try {
+
+        const response =
+            await fetch("/api/reports");
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load civic statistics."
+            );
+
+        }
+
+
+        // Total Reports
+
+        document.getElementById(
+            "homeTotalReports"
+        ).textContent =
+            data.total_reports;
+
+
+        // Resolved Reports
+
+        document.getElementById(
+            "homeResolvedReports"
+        ).textContent =
+            data.resolved;
+
+
+        // High Priority Reports
+
+        document.getElementById(
+            "homeHighPriorityReports"
+        ).textContent =
+            data.high_priority;
+
+
+        // Community Response
+
+        let responsePercentage = 0;
+
+        if (data.total_reports > 0) {
+
+            responsePercentage =
+                Math.round(
+                    (
+                        data.resolved /
+                        data.total_reports
+                    ) * 100
+                );
+
+        }
+
+
+        document.getElementById(
+            "homeResponsePercentage"
+        ).textContent =
+            responsePercentage + "%";
+
+
+    } catch (error) {
+
+        console.error(
+            "Homepage statistics error:",
+            error
+        );
+
+    }
+
+}
+
+
+// Load statistics when homepage opens
+
+loadHomeStatistics();
+
+</script>
+
+</body>
+</html>

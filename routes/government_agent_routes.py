@@ -90,7 +90,7 @@ def government_agent_login():
             supabase.table("government_agents")
             .select(
                 "id, full_name, email, department, employee_id, "
-                "password_hash, status","latitude","longitude"
+                "password_hash, status,"latitude","longitude"
             )
             .eq("email", email)
             .limit(1)

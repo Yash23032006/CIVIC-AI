@@ -6,6 +6,7 @@ requires-python = ">=3.12,<3.15"
 dependencies = [
     "Flask",
     "Flask-Cors",
+    "python-dotenv",
     "Werkzeug",
     "supabase"
 ]

@@ -3,3 +3,4 @@ Flask-Cors
 Werkzeug
 supabase
 google-genai
+python-dotenv

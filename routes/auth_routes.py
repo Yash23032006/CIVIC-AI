@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from services.user_service import load_users, save_users
+from config import supabase
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -32,8 +33,34 @@ def signup():
         "mobile": mobile,
         "password": generate_password_hash(password)
     })
-    save_users(users)
-    return jsonify({"status": "success", "message": "Account created successfully!"}), 201
+    try:
+        existing = (
+            supabase.table("citizen_users")
+            .select("id")
+            .eq("email", email)
+            .limit(1)
+            .execute()
+        )
+
+        if existing.data:
+            return jsonify({
+                "status": "error",
+                "message": "An account with this email already exists."
+            }), 409
+
+        supabase.table("citizen_users").insert({
+            "name": name,
+            "email": email,
+            "mobile": mobile,
+            "password_hash": generate_password_hash(password)
+        }).execute()
+
+    except Exception as error:
+        print("Citizen signup error:", repr(error))
+        return jsonify({
+            "status": "error",
+            "message": "Registration failed. Please try again."
+        }), 500
 
 
 @auth_bp.route("/api/login", methods=["POST"])

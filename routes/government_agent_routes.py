@@ -89,9 +89,9 @@ def government_agent_login():
         result = (
             supabase.table("government_agents")
             .select(
-                "id, full_name, email, department, employee_id, "
-                "password_hash, status","latitude","longitude"
-            )
+    "id, full_name, email, department, employee_id, "
+    "password_hash, status, latitude, longitude"
+)
             .eq("email", email)
             .limit(1)
             .execute()

@@ -391,32 +391,55 @@
                 padding: 15px;
             }
         }
-        #complaintMap {
-    width: 100%;
-    height: 420px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    z-index: 1;
-}
+        #complaintMap,
+        #cityHeatMap {
+            width: 100%;
+            height: 420px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            z-index: 1;
+        }
 
-.map-panel {
-    background: white;
-    padding: 24px;
-    margin-bottom: 24px;
-    border-radius: 15px;
-    border: 1px solid #e7edf5;
-    box-shadow: 0 3px 15px #0f172a0a;
-}
+        .map-panel {
+            background: white;
+            padding: 24px;
+            margin-bottom: 24px;
+            border-radius: 15px;
+            border: 1px solid #e7edf5;
+            box-shadow: 0 3px 15px #0f172a0a;
+        }
 
-.map-panel h2 {
-    margin-top: 0;
-    margin-bottom: 8px;
-}
+        .map-panel h2 {
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
 
-#mapMessage {
-    color: #64748b;
-    margin-top: 12px;
-}
+        .map-toggle {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .map-toggle button[aria-pressed="true"] {
+            background: #1d4ed8;
+            color: white;
+        }
+
+        #mapMessage,
+        #heatMapMessage {
+            color: #64748b;
+            margin-top: 12px;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
 
     </style>
         <link
@@ -490,13 +513,26 @@
         <section class="map-panel" id="complaintMapSection">
             <div class="panel-heading">
                 <div>
-                    <h2>📍 Complaint Locations</h2>
-                    <p class="muted">Select a marker to view complaint details. Only reports with valid GPS coordinates appear.</p>
+                    <h2>🗺️ Complaint Map</h2>
+                    <p class="muted">Switch between individual complaint locations and city-wise complaint density.</p>
                 </div>
                 <button class="btn btn-primary" id="fitMapBtn" type="button">↗ Fit Markers</button>
             </div>
-            <div id="complaintMap" role="application" aria-label="Map of citizen complaint locations"></div>
-            <p id="mapMessage" role="status" aria-live="polite">Loading complaint locations...</p>
+
+            <div class="map-toggle" role="group" aria-label="Choose map type">
+                <button type="button" id="normalMapBtn" class="btn btn-primary" aria-pressed="true">📍 Normal Map</button>
+                <button type="button" id="heatMapBtn" class="btn btn-secondary" aria-pressed="false">🔥 Heatmap</button>
+            </div>
+
+            <div id="normalMapView">
+                <div id="complaintMap" role="application" aria-label="Individual complaint locations"></div>
+                <p id="mapMessage" role="status" aria-live="polite">Loading complaint locations...</p>
+            </div>
+
+            <div id="heatMapView" hidden>
+                <div id="cityHeatMap" role="application" aria-label="City-wise complaint density heatmap"></div>
+                <p id="heatMapMessage" role="status" aria-live="polite">Select Heatmap to load city-wise complaint density.</p>
+            </div>
         </section>
 
         <section class="reports-panel" id="reports">
@@ -557,6 +593,7 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script>
     const API_BASE = window.location.origin;
 
@@ -683,6 +720,149 @@
         }
     }
 
+    // Heatmap state is separate from the normal GPS-marker map.
+    let cityHeatMap = null;
+    let cityHeatLayer = null;
+    let visibleReports = [];
+
+    // Add more city centres here if your reports use other cities.
+    // The heatmap uses approximate city centres and does not need citizen GPS input.
+    const cityCenters = {
+        "pune": [18.5204, 73.8567],
+        "mumbai": [19.0760, 72.8777],
+        "nashik": [19.9975, 73.7898],
+        "nagpur": [21.1458, 79.0882],
+        "thane": [19.2183, 72.9781],
+        "pimpri-chinchwad": [18.6298, 73.7997],
+        "aurangabad": [19.8762, 75.3433],
+        "chhatrapati sambhajinagar": [19.8762, 75.3433],
+        "solapur": [17.6599, 75.9064],
+        "kolhapur": [16.7050, 74.2433],
+        "amravati": [20.9374, 77.7796],
+        "navi mumbai": [19.0330, 73.0297]
+    };
+
+    
+function findCityKey(report) {
+    const normalize = value =>
+        String(value || "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, " ")
+            .trim()
+            .replace(/\s+/g, " ");
+
+    const text = normalize(
+        `${report.city || ""} ${report.location || ""}`
+    );
+
+    const aliases = {
+        "pcmc": "pimpri-chinchwad",
+        "pimpri chinchwad": "pimpri-chinchwad",
+        "bombay": "mumbai",
+        "nasik": "nashik",
+        "sambhajinagar": "chhatrapati sambhajinagar"
+    };
+
+    // Match longer city names first, e.g. Navi Mumbai before Mumbai.
+    const cityNames = Object.keys(cityCenters)
+        .sort((a, b) => b.length - a.length);
+
+    for (const city of cityNames) {
+        const normalizedCity = normalize(city);
+
+        if (` ${text} `.includes(` ${normalizedCity} `)) {
+            return city;
+        }
+    }
+
+    // Check common aliases.
+    const aliasNames = Object.keys(aliases)
+        .sort((a, b) => b.length - a.length);
+
+    for (const alias of aliasNames) {
+        if (` ${text} `.includes(` ${normalize(alias)} `)) {
+            return aliases[alias];
+        }
+    }
+
+    return null;
+}
+
+    function initializeCityHeatMap() {
+        const message = document.getElementById("heatMapMessage");
+        if (!window.L || typeof L.heatLayer !== "function") {
+            message.textContent = "The heatmap library could not load. Check your internet connection and reload this page.";
+            return;
+        }
+
+        if (!cityHeatMap) {
+            cityHeatMap = L.map("cityHeatMap").setView([20.5937, 78.9629], 5);
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
+                maxZoom: 18
+            }).addTo(cityHeatMap);
+            cityHeatLayer = L.heatLayer([], {
+                radius: 35,
+                blur: 25,
+                maxZoom: 12,
+                max: 1
+            }).addTo(cityHeatMap);
+        }
+
+        updateCityHeatMap(visibleReports);
+        requestAnimationFrame(() => cityHeatMap && cityHeatMap.invalidateSize());
+    }
+
+    function updateCityHeatMap(reports) {
+        const message = document.getElementById("heatMapMessage");
+        if (!cityHeatMap || !cityHeatLayer) return;
+
+        const counts = new Map();
+        reports.forEach(report => {
+            const city = findCityKey(report);
+            if (city) counts.set(city, (counts.get(city) || 0) + 1);
+        });
+
+        const maxCount = Math.max(1, ...counts.values());
+        const points = [];
+        counts.forEach((count, city) => {
+            const [latitude, longitude] = cityCenters[city];
+            points.push([latitude, longitude, Math.max(0.15, count / maxCount)]);
+        });
+
+        cityHeatLayer.setLatLngs(points);
+        if (points.length) {
+            const bounds = L.latLngBounds(points.map(point => [point[0], point[1]]));
+            if (points.length === 1) {
+                cityHeatMap.setView([points[0][0], points[0][1]], 10);
+            } else {
+                cityHeatMap.fitBounds(bounds, { padding: [24, 24], maxZoom: 10 });
+            }
+            const totalMatched = Array.from(counts.values()).reduce((sum, count) => sum + count, 0);
+            message.textContent = `Heatmap represents ${totalMatched} complaint(s) across ${points.length} supported city/cities. Positions use approximate city centres.`;
+        } else {
+            cityHeatMap.setView([20.5937, 78.9629], 5);
+            message.textContent = "No complaints matched the configured city names. Add your cities to cityCenters or check the city/location field in your reports.";
+        }
+        requestAnimationFrame(() => cityHeatMap && cityHeatMap.invalidateSize());
+    }
+
+    function showMapView(view) {
+        const showNormal = view === "normal";
+        document.getElementById("normalMapView").hidden = !showNormal;
+        document.getElementById("heatMapView").hidden = showNormal;
+        document.getElementById("normalMapBtn").setAttribute("aria-pressed", String(showNormal));
+        document.getElementById("heatMapBtn").setAttribute("aria-pressed", String(!showNormal));
+
+        if (showNormal) {
+            requestAnimationFrame(() => complaintMap && complaintMap.invalidateSize());
+        } else {
+            if (!cityHeatMap) initializeCityHeatMap();
+            else updateCityHeatMap(visibleReports);
+            requestAnimationFrame(() => cityHeatMap && cityHeatMap.invalidateSize());
+        }
+    }
+
     function safe(value) {
         return String(value ?? "").replace(/[&<>"']/g, char => ({
             "&": "&amp;",
@@ -754,7 +934,9 @@
                 (!selectedStatus || status === selectedStatus);
         });
 
+        visibleReports = filtered;
         updateComplaintMap(filtered);
+        updateCityHeatMap(filtered);
 
         const body = document.getElementById("reportsBody");
 
@@ -857,6 +1039,12 @@
 
     document.getElementById("fitMapBtn")
         .addEventListener("click", fitComplaintMarkers);
+
+    document.getElementById("normalMapBtn")
+        .addEventListener("click", () => showMapView("normal"));
+
+    document.getElementById("heatMapBtn")
+        .addEventListener("click", () => showMapView("heat"));
 
     document.getElementById("logoutBtn").addEventListener("click", () => {
         sessionStorage.removeItem("governmentAgent");
